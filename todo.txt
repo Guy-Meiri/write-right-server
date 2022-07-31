@@ -1,0 +1,27 @@
+TODO:
+
+* responsive text font
+* different fonts
+* text scrolling (while writing)
+* responsive design
+* error margin for feedback
+* smooth stroke
+* general design
+* organize project structure
+* github permissions
+* timer, score calculation, accuracy
+* texts pool (user picked, random, by subject, upload texts)
+* multiplayer
+* statistics
+* deployment
+
+* draw feel
+    - add another offscreen canvas to add shadows around the letters
+    - the solution canvas still serves as the indication of positive and negative points
+    - keep a list of visited pixel coordinates instead of comparing drawn pixels to solution canvas
+
+* letter path construction
+    - get all intersected points on mouse move
+    - improve the algorithm to construct the letter points
+
+* install tslib
