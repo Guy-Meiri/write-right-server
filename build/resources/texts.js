@@ -26,4 +26,3 @@ const getRandomText = () => {
 };
 module.exports = { texts, getRandomText };
 
-//added comment to rebuild
