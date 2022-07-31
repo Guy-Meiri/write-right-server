@@ -4,6 +4,8 @@
 	"description": "bla blue bla This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).",
 	"main": "index.js",
 	"scripts": {
+		"start": "node dist/server.js",
+		"build": "tsc",
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"client": "cd client && npm start",
 		"server": "ts-node-dev server/server.ts"
