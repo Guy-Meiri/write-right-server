@@ -60,6 +60,14 @@ io.on("connection", socket => {
 		}
 	});
 
+	socket.on("clientAdminDisconnectAll", () => {
+		console.log("in disconnectAllHandler");
+		io.disconnectSockets();
+		if (timerIntervalToCleanUpAtGameEnd) {
+			clearInterval(timerIntervalToCleanUpAtGameEnd);
+		}
+	});
+
 	socket.on("disconnect", () => {
 		console.log(`${socket.id} just disconnected`);
 		players = players.filter(player => player.id !== socket.id);
