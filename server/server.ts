@@ -72,6 +72,9 @@ io.on("connection", socket => {
 		console.log(`${socket.id} just disconnected`);
 		players = players.filter(player => player.id !== socket.id);
 		socket.broadcast.emit("playerLeft", socket.id);
+		if (players.length === 0 && timerIntervalToCleanUpAtGameEnd) {
+			clearInterval(timerIntervalToCleanUpAtGameEnd);
+		}
 	});
 
 	io.to(socket.id).emit("initial", players);
