@@ -2,6 +2,7 @@ import express from "express";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import { Player } from "./types";
+import { calcGameTimeByTextLeft, getWinningPlayer } from "./utils";
 const { getRandomText } = require("./resources/texts");
 
 const port = process.env.PORT || 5001;
@@ -23,6 +24,7 @@ const PLAYERS_REQUIRED_TO_START_GAME = 2;
 // });
 
 // app.use(express.static(path.join(__dirname, "..", "client", "build")));
+let timerIntervalToCleanUpAtGameEnd: NodeJS.Timer;
 
 io.on("connection", socket => {
 	console.log(`${socket.id} just connected`);
@@ -34,7 +36,18 @@ io.on("connection", socket => {
 		if (players.length === PLAYERS_REQUIRED_TO_START_GAME) {
 			console.log("emiting gameStarted");
 
-			io.emit("gameStarted", getRandomText());
+			const gameText = getRandomText();
+			io.emit("gameStarted", gameText);
+			let gameTimeLeft = calcGameTimeByTextLeft(gameText);
+
+			io.emit("gameTick", gameTimeLeft);
+			timerIntervalToCleanUpAtGameEnd = setInterval(() => {
+				gameTimeLeft -= 1;
+				io.emit("gameTick", gameTimeLeft);
+				if (gameTimeLeft <= 0) {
+					onGameOver();
+				}
+			}, 1000);
 		}
 	});
 
@@ -43,10 +56,8 @@ io.on("connection", socket => {
 		socket.broadcast.emit("opponentProgressUpdate", player);
 
 		if (player.progressStatus.completionPercentage > 99) {
-			io.emit("playerWon", player);
+			onGameOver();
 		}
-
-		//todo: implement gameover logic
 	});
 
 	socket.on("disconnect", () => {
@@ -58,6 +69,12 @@ io.on("connection", socket => {
 	io.to(socket.id).emit("initial", players);
 });
 
+const onGameOver = () => {
+	io.emit("playerWon", getWinningPlayer(players));
+	clearInterval(timerIntervalToCleanUpAtGameEnd);
+	players = [];
+	io.emit("initial", players);
+};
 httpServer.listen(port, () => {
 	console.log(`listening on port ${port}`);
 });
