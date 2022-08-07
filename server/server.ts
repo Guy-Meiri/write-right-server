@@ -15,6 +15,7 @@ const io = new Server(httpServer, {
 	},
 });
 let players: Player[] = [];
+let isGameOver = false;
 const PLAYERS_REQUIRED_TO_START_GAME = 2;
 
 // app.get("/", (req, res) => {
@@ -34,8 +35,8 @@ io.on("connection", socket => {
 		socket.broadcast.emit("newPlayer", newPlayer);
 		players.push(newPlayer);
 		if (players.length === PLAYERS_REQUIRED_TO_START_GAME) {
+			isGameOver = false;
 			console.log("emiting gameStarted");
-
 			const gameText = getRandomText();
 			io.emit("gameStarted", gameText);
 			let gameTimeLeft = calcGameTimeByTextLeft(gameText);
@@ -44,6 +45,7 @@ io.on("connection", socket => {
 			timerIntervalToCleanUpAtGameEnd = setInterval(() => {
 				gameTimeLeft -= 1;
 				io.emit("gameTick", gameTimeLeft);
+				console.log(`tick, time left for game: ${gameTimeLeft}`);
 				if (gameTimeLeft <= 0) {
 					onGameOver();
 				}
@@ -52,9 +54,12 @@ io.on("connection", socket => {
 	});
 
 	socket.on("playerProgressUpdateFromClient", (player: Player) => {
+		if (isGameOver) return;
+
 		console.log(`player with id: ${player.id} progress update:`, player.progressStatus);
 		socket.broadcast.emit("opponentProgressUpdate", player);
 
+		players = [...players.filter(p => p.id !== player.id), player];
 		if (player.progressStatus.completionPercentage > 99) {
 			onGameOver();
 		}
@@ -81,8 +86,13 @@ io.on("connection", socket => {
 });
 
 const onGameOver = () => {
-	io.emit("playerWon", getWinningPlayer(players));
+	isGameOver = true;
+	// const winningPlayer = getWinningPlayer(players);
+	io.emit("gameOverResults", players);
+	// console.log(`player won: ${JSON.stringify(winningPlayer)}`);
+	console.log(`results: ${JSON.stringify(players)}`);
 	clearInterval(timerIntervalToCleanUpAtGameEnd);
+
 	players = [];
 	io.emit("initial", players);
 };
