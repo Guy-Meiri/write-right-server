@@ -2,7 +2,7 @@ import { findAncestor } from "typescript";
 import { Player } from "./types";
 
 export const calcGameTimeByTextLeft = (gameText: string) => {
-	return Math.floor(gameText.length);
+	return Math.floor(gameText.length * 0.8);
 };
 
 export const getWinningPlayer = (players: Player[]) => {
